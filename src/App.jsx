@@ -7,20 +7,22 @@ function App() {
         { id: 2, label: 'WM', value: 'Hyprland' },
         { id: 3, label: 'Shell', value: 'zsh' },
     ]);
-    const [config, setConfig] = useState({
-        wm: 'Hyprland',
-        distro: 'Arch Linux',
-        color: '#7aa2f7'
-    });
+    const [dotfiles, setDotfiles] = useState(undefined);
+    const [image, setImage] = useState(null);
+    const [dotfileClick, setDotfileClick] = useState(true);
+    const [haveCredit, setHaveCredit] = useState(true);
 
-    // 2. This function runs every time a user types
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setConfig({
-            ...config, // Keep the old values
-            [name]: value // Update only the one that changed
-        });
+    const handleImageUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImage(reader.result); // This is the Base64 string
+            };
+            reader.readAsDataURL(file);
+        }
     };
+
     const exportSVG = () => {
         // 1. Get the SVG element by an ID we'll set
         const svgElement = document.getElementById("rice-svg");
@@ -39,7 +41,7 @@ function App() {
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = `${config.wm}-rice.svg`;
+        link.download = `my-rice.svg`;
         link.click();
 
         // Clean up the URL object
@@ -50,7 +52,7 @@ function App() {
     };
 
     const addField = () => {
-        setFields([...fields, { id: Date.now(), label: 'New', value: 'Value' }]);
+        setFields([...fields, { id: Date.now(), label: 'Rice', value: 'Card' }]);
     };
 
     const removeField = (id) => {
@@ -62,30 +64,58 @@ function App() {
             {/* Sidebar Form */}
             <aside className="w-80 bg-[#16161e] p-8 border-r border-[#24283b]">
                 <h2 className="text-xl font-bold mb-6 text-white">Ricecard</h2>
-
-                <div className="space-y-4">
-                    <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase mb-2">
-                            Window Manager
-                        </label>
+                <div className="mb-6">
+                    <label className="block text-xs font-bold text-gray-500 uppercase mb-2">
+                        Logo / Image
+                    </label>
+                    <div className="relative border-2 border-dashed border-[#414868] rounded-lg p-4 hover:border-blue-500 transition-colors text-center">
                         <input
-                            type="text"
-                            name="wm" // This matches the key in our state
-                            value={config.wm}
-                            onChange={handleInputChange}
-                            placeholder="e.g. Sway, i3, KWin"
-                            className="w-full bg-[#1a1b26] border border-[#414868] rounded p-2 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageUpload}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                         />
+                        <p className="text-sm text-gray-400">
+                            {image ? "Change Image" : "Upload PNG/JPG"}
+                        </p>
                     </div>
-                    <div className="pt-6 border-t border-[#24283b] mt-6">
-                        <button
-                            onClick={exportSVG}
-                            className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
-                            Export SVG
-                        </button>
-                    </div>
+                </div>
+                <div className="mb-6">
+                    <label className="block text-xs font-bold text-gray-500 uppercase mb-2">
+                        Dotfiles
+                    </label>
+                    <input
+                        value={dotfiles}
+                        onChange={(e) => setDotfiles(e.target.value)}
+                        placeholder="(Optional)"
+                        className="w-full bg-[#1a1b26] border border-[#414868] rounded p-1 text-xs text-gray-400"
+                    />
+                </div>
+                <div className="flex items-center gap-3 mb-6">
+                    <input
+                        id="show-buttons"
+                        type="checkbox"
+                        checked={dotfileClick}
+                        onChange={(e) => setDotfileClick(e.target.checked)}
+                        // "accent-blue-500" styles the checkbox color easily
+                        className="w-4 h-4 rounded bg-[#1a1b26] border-[#414868] accent-blue-500 cursor-pointer"
+                    />
+                    <label htmlFor="show-buttons" className="text-xs font-bold text-gray-500 uppercase cursor-pointer select-none">
+                        Show Window Buttons
+                    </label>
+                </div>
+                <div className="flex items-center gap-3 mb-6">
+                    <input
+                        id="credit"
+                        type="checkbox"
+                        checked={haveCredit}
+                        onChange={(e) => setHaveCredit(e.target.checked)}
+                        // "accent-blue-500" styles the checkbox color easily
+                        className="w-4 h-4 rounded bg-[#1a1b26] border-[#414868] accent-blue-500 cursor-pointer"
+                    />
+                    <label htmlFor="credit" className="text-xs font-bold text-gray-500 uppercase cursor-pointer select-none">
+                        pls don't uncheck me :c (MENTION RICECARD)
+                    </label>
                 </div>
                 <div className="space-y-4">
                     {fields.map((field) => (
@@ -113,9 +143,18 @@ function App() {
 
                     <button
                         onClick={addField}
-                        className="w-full py-2 border border-dashed border-[#414868] text-gray-500 hover:text-white transition-colors"
+                        className="w-full py-2 border border-dashed border-[#414868] text-white"
                     >
                         + Add Row
+                    </button>
+                </div>
+                <div className="pt-6 border-t border-[#24283b] mt-6">
+                    <button
+                        onClick={exportSVG}
+                        className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+                        Export SVG
                     </button>
                 </div>
             </aside>
@@ -123,7 +162,7 @@ function App() {
             {/* Preview Area */}
             <main className="flex-1 p-8 h-screen flex items-center justify-center">
                 <div className="w-full h-full max-w-6xl flex items-center justify-center">
-                    <RiceCard fields={fields} themeColor="#ffffff" />
+                    <RiceCard dotfilesClick={dotfileClick} dotfiles={dotfiles} fields={fields} themeColor="#ffffff" image={image} haveCredit={haveCredit} />
                 </div>
             </main>
         </div>
