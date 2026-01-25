@@ -1,62 +1,70 @@
-const RiceRow = ({ label, value, y, color }) => (
-    <text x="40" y={y} fontFamily="monospace" fontSize="16" className="animate-fade-in">
-        <tspan fill={color} fontWeight="bold">{label}: </tspan>
-        <tspan fill="#a9b1d6">{value}</tspan>
-    </text>
+const RiceRow = ({ label, value, src, y, theme }) => (
+    <a href={src}>
+        <text x="40" y={y} fontSize="16" className="transition-transform duration-300 hover:-translate-y-1 animate-fade-in">
+            <tspan fill={theme.accent} fontWeight="bold">{label}: </tspan>
+            <tspan fill={theme.text}>{value}</tspan>
+        </text>
+    </a>
 );
 
-export default function RiceCard({ dotfiles, dotfilesClick, fields, themeColor, image, haveCredit }) {
-    // Let's make the height dynamic based on the number of fields
-    const dynamicHeight = Math.max(220, 60 + fields.length * 35);
-
+export default function RiceCard({ dotfiles, hint, fields, theme, image, credit }) {
+    const fontUrlName = theme.font.replace(/\s+/g, '+');
     return (
         <svg
             id="rice-svg"
             width="100%"
             height="100%"
-            viewBox={`0 0 500 ${dynamicHeight}`}
+            viewBox={`0 0 500 250`}
             xmlns="http://www.w3.org/2000/svg"
+            fontFamily={theme.font}
         >
-            <rect width="500" height={dynamicHeight} rx="15" fill="#1a1b26" />
+            <defs>
+                <style type="text/css">
+                    {`@import url('https://fonts.googleapis.com/css2?family=${fontUrlName}&display=swap');`}
+                </style>
+            </defs>
+            <rect width="500" height="250" rx="15" fill={theme.bg} />
 
-            {/* The Uploaded Image (Left Side) */}
-            {image ? (
+            {image.url ? (
                 <image
-                    href={image}
-                    x="20"
-                    y="20"
-                    width="160"
-                    height="90"
+                    href={image.url}
+                    x={image.x}
+                    y={image.y}
+                    width={image.width}
+                    height={image.height}
                     preserveAspectRatio="xMidYMid slice"
-                    clipPath="inset(0% round 10px)" // Optional: rounds the corners of the image
+                    clipPath="inset(0% round 5px)" // Optional: rounds the corners of the image
                 />
             ) : (
-                <rect x="20" y="20" width="160" height="90" fill="#24283b" rx="10" />
+                <rect x={image.x} y={image.y} width={image.width} height={image.height} fill={theme.accent} rx="5" />
             )}
 
-            <text x="40" y="150" fontFamily="monospace" fontSize="16" className="animate-fade-in">
-                <tspan fill="#a9b1d6">{dotfiles}</tspan>
-            </text>
-            {dotfilesClick &&
-                <text x="20" y="200" fontFamily="monospace" fontSize="8" className="animate-fade-in">
-                    <tspan fill="#a9b1d6">Check each choice by clicking!</tspan>
+            <a href={dotfiles.src}>
+                <text x={dotfiles.x} y={dotfiles.y} fontSize="16" className="transition-transform duration-300 hover:-translate-y-1 animate-fade-in cursor-pointer">
+                    <tspan fill={theme.text}>{dotfiles.title}</tspan>
+                </text>
+            </a>
+            {hint.show &&
+                <text x={hint.x} y={hint.y} fontSize="8" className="animate-fade-in">
+                    <tspan fill={theme.text}>Things that hover are all links!</tspan>
                 </text>
             }
-            {haveCredit &&
-                <text x="320" y="200" fontFamily="monospace" fontSize="8" className="animate-fade-in">
-                    <tspan fill="#a9b1d6">Made with danew9c.com/ricecard :)</tspan>
+            {credit.show &&
+                <text x={credit.x} y={credit.y} fontSize="8" className="transition-transform duration-300 hover:-translate-y-1 animate-fade-in cursor-pointer">
+                    <tspan fill={theme.text}>Made with danew9c.com/ricecard :)</tspan>
                 </text>
             }
 
             {/* The Fields (Shifted to the right to make room for the image) */}
-            <g transform="translate(200, 0)">
+            <g transform="translate(250, 0)">
                 {fields.map((field, index) => (
                     <RiceRow
                         key={field.id}
                         label={field.label}
                         value={field.value}
+                        src={field.src}
                         y={70 + (index * 35)}
-                        color={themeColor}
+                        theme={theme}
                     />
                 ))}
             </g>
