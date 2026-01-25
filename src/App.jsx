@@ -1,104 +1,37 @@
 import React, { useState } from 'react';
-import RiceCard from './RiceCard';
+import RiceCard from './components/RiceCard';
+import Pos from './components/sidebar_modules/Pos';
+import Sep from './components/sidebar_modules/Sep';
+import Size from './components/sidebar_modules/Size';
+import Gap from './components/sidebar_modules/Gap';
+import BorderRadius from './components/sidebar_modules/BorderRadius';
+import ThemeButton from './components/sidebar_modules/ThemeButton';
+import { exportSVG, exportPNG } from './components/sidebar_modules/export';
 
-function Pos({ element, setter }) {
-    return (
-        <div className='flex flex-row text-center items-center'>
-            <label className="text-xs font-bold text-gray-500 uppercase block">
-                X:
-            </label>
-            <input
-                type="number"
-                min="0"
-                max="500"
-                value={element.x}
-                onChange={(e) => setter({ ...element, x: parseInt(e.target.value) })}
-                className="text-center ml-2 w-full h-8 bg-[#1a1b26] rounded-lg appearance-none cursor-text accent-blue-500"
-            />
-            <label className="ml-2 text-xs font-bold text-gray-500 uppercase block">
-                Y:
-            </label>
-            <input
-                type="number"
-                min="0"
-                max="250"
-                value={element.y}
-                onChange={(e) => setter({ ...element, y: parseInt(e.target.value) })}
-                className="text-center ml-2 w-full h-8 bg-[#1a1b26] rounded-lg appearance-none cursor-text accent-blue-500"
-            />
-        </div>
-    )
-}
-function Sep() {
-    return <hr className="border-t border-[#24283b] my-6" />
-}
+import themes from './data/themes';
+
 function App() {
-    const [fields, setFields] = useState([
-        { id: 1, label: 'OS', value: 'Arch Linux', src: 'https://archlinux.org' },
-        { id: 2, label: 'WM', value: 'Niri', src: 'https://github.com/YaLTeR/niri' },
-        { id: 3, label: 'Shell', value: 'fish', src: 'https://fishshell.com' },
-        { id: 4, label: 'App Launcher', value: 'Vicinae', src: 'https://www.vicinae.com' },
-    ]);
-    const themes = [
-        {
-            name: "Tokyo Night",
-            bg: "#1a1b26",
-            accent: "#7aa2f7",
-            text: "#a9b1d6",
-            border: "#24283b",
-            font: "Fira Code"
-        },
-        {
-            name: "Catppuccin",
-            bg: "#1e1e2e",
-            accent: "#cba6f7",
-            text: "#cdd6f4",
-            border: "#313244",
-            font: "Fira Code"
-        },
-        {
-            name: "Everforest",
-            bg: "#2b3339",
-            accent: "#a7c080",
-            text: "#d3c6aa",
-            border: "#3a4248",
-            font: "Fira Code"
-        }
-    ];
-    const ThemeButton = ({ theme, isActive, onClick }) => {
-        return (
-            <button
-                onClick={onClick}
-                style={{
-                    "--text-color": theme.text,
-                    "--accent-color": theme.accent,
-                    backgroundColor: theme.bg,
-                    borderColor: isActive ? '#3b82f6' : theme.border // Blue-500 if active
-                }}
-                className={`w-full group flex flex-col gap-2 p-3 rounded-xl border-2 transition-all active:scale-95 
-    			${isActive ? "bg-[#24283b]" : "bg-transparent hover:bg-[#1f2335]"}`}
-            >
-                <span
-                    style={{ color: 'var(--text-color)' }}
-                    className="text-[10px] font-bold uppercase tracking-widest transition-colors group-hover:!text-[var(--accent-color)]"
-                >
-                    {theme.name}
-                </span>
-            </button>
-        );
-    };
+    const [fields, setFields] = useState({
+        values: [
+            { id: 1, label: 'OS', value: 'Arch Linux', src: 'https://archlinux.org' },
+            { id: 2, label: 'WM', value: 'Niri', src: 'https://github.com/YaLTeR/niri' },
+            { id: 3, label: 'Shell', value: 'fish', src: 'https://fishshell.com' },
+            { id: 4, label: 'App Launcher', value: 'Vicinae', src: 'https://www.vicinae.com' },
+        ],
+        x: 280, y: 70, size: 14, gap: 35
+    });
     const [dotfiles, setDotfiles] = useState({
         title: "github.com/New9c/workflow", src: "https://github.com/New9c/workflow",
-        x: 20, y: 200
+        x: 50, y: 200, size: 12
     });
     const [theme, setTheme] = useState({
         name: "Tokyo Night", bg: "#1a1b26",
         accent: "#7aa2f7", text: "#a9b1d6",
         font: "Fira Code"
     });
-    const [image, setImage] = useState({ url: null, width: 240, height: 135, x: 20, y: 20 });
-    const [hint, setHint] = useState({ show: true, x: 20, y: 240 });
-    const [credit, setCredit] = useState({ show: true, x: 320, y: 240 });
+    const [image, setImage] = useState({ url: null, width: 240, height: 135, x: 20, y: 30, radius: 10 });
+    const [hint, setHint] = useState({ show: true, x: 20, y: 240, size: 8 });
+    const [credit, setCredit] = useState({ show: true, x: 320, y: 240, size: 8 });
 
     const handleImageUpload = (e) => {
         const file = e.target.files[0];
@@ -111,73 +44,31 @@ function App() {
         }
     };
 
-    const exportSVG = () => {
-        // 1. Get the SVG element by an ID we'll set
-        const svgElement = document.getElementById("rice-svg");
-
-        // 2. Serialize the SVG to a XML string
-        const serializer = new XMLSerializer();
-        let source = serializer.serializeToString(svgElement);
-
-        // 3. Add namespaces if they are missing (crucial for some viewers)
-        if (!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
-            source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
-        }
-
-        // 4. Create a Blob and a dummy link to trigger download
-        const blob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `my-rice.svg`;
-        link.click();
-
-        // Clean up the URL object
-        URL.revokeObjectURL(url);
-    };
-    const exportPNG = async () => {
-        const svg = document.querySelector("#rice-svg");
-        const svgData = new XMLSerializer().serializeToString(svg);
-
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-        const scale = 4;
-        canvas.width = 500 * scale;
-        canvas.height = 250 * scale;
-        ctx.scale(scale, scale);
-
-        const img = new Image();
-        const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
-        const url = URL.createObjectURL(svgBlob);
-
-        img.onload = () => {
-            // 1. Instead of drawing immediately, we wait 1 second
-            setTimeout(() => {
-                ctx.drawImage(img, 0, 0, 500, 250);
-
-                const pngUrl = canvas.toDataURL("image/png", 1.0);
-                const downloadLink = document.createElement("a");
-                downloadLink.href = pngUrl;
-                downloadLink.download = "my-rice.png";
-                downloadLink.click();
-
-                URL.revokeObjectURL(url);
-            }, 1000); // 1000ms = 1 second "Force Wait"
-        };
-
-        img.src = url;
-    };
 
     const updateField = (id, key, newValue) => {
-        setFields(fields.map(f => f.id === id ? { ...f, [key]: newValue } : f));
+        setFields(prev => ({
+            ...prev, // Keep x, y, size, gap
+            values: prev.values.map(f =>
+                f.id === id ? { ...f, [key]: newValue } : f
+            )
+        }));
     };
 
     const addField = () => {
-        setFields([...fields, { id: Date.now(), label: 'Rice', value: 'Card' }]);
+        setFields(prev => ({
+            ...prev, // Keep x, y, size, gap
+            values: [
+                ...prev.values,
+                { id: Date.now(), label: 'Rice', value: 'Card' }
+            ]
+        }));
     };
 
     const removeField = (id) => {
-        setFields(fields.filter(f => f.id !== id));
+        setFields(prev => ({
+            ...prev, // Keep x, y, size, gap
+            values: prev.values.filter(f => f.id !== id)
+        }));
     };
     return (
         <div className="flex bg-[#0f0f14] text-gray-200">
@@ -246,10 +137,11 @@ function App() {
                         />
                     </div>
                     <Pos element={image} setter={setImage} />
+                    <BorderRadius element={image} setter={setImage} />
                 </div>
                 <Sep />
                 <div className="space-y-4">
-                    {fields.map((field) => (
+                    {fields.values.map((field) => (
                         <div key={field.id} className="flex gap-2 items-end">
                             <div className="flex-1">
                                 <input
@@ -284,6 +176,9 @@ function App() {
                         + Add Row
                     </button>
                 </div>
+                <Pos element={fields} setter={setFields} />
+                <Size element={fields} setter={setFields} />
+                <Gap element={fields} setter={setFields} />
                 <Sep />
                 <div className="mb-6">
                     <label className="block text-xs font-bold text-gray-500 uppercase mb-2">
@@ -305,6 +200,7 @@ function App() {
                     />
                 </div>
                 <Pos element={dotfiles} setter={setDotfiles} />
+                <Size element={dotfiles} setter={setDotfiles} />
                 <Sep />
                 <div className="flex items-center gap-3 mb-6">
                     <input
@@ -319,6 +215,7 @@ function App() {
                     </label>
                 </div>
                 <Pos element={hint} setter={setHint} />
+                <Size element={hint} setter={setHint} />
                 <Sep />
                 <div className="flex items-center gap-3 mb-6">
                     <input
@@ -334,6 +231,7 @@ function App() {
                     </label>
                 </div>
                 <Pos element={credit} setter={setCredit} />
+                <Size element={credit} setter={setCredit} />
                 <Sep />
                 <div className="pt-6 mt-6">
                     <button
