@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import Baloo_2 from "nano-font/fonts/Baloo_2";
+import React, { useState, useEffect } from 'react';
 import RiceCard from './components/RiceCard';
+import FontPicker from './components/sidebar_modules/FontPicker'
 import Pos from './components/sidebar_modules/Pos';
 import Sep from './components/sidebar_modules/Sep';
 import Size from './components/sidebar_modules/Size';
+import WidthHeight from './components/sidebar_modules/WidthHeight';
 import Gap from './components/sidebar_modules/Gap';
 import BorderRadius from './components/sidebar_modules/BorderRadius';
 import ThemeButton from './components/sidebar_modules/ThemeButton';
@@ -27,8 +30,10 @@ function App() {
     const [theme, setTheme] = useState({
         name: "Tokyo Night", bg: "#1a1b26",
         accent: "#7aa2f7", text: "#a9b1d6",
-        font: "Fira Code"
+        radius: 15, width: 500, height: 250
     });
+    const [selectedFont, setSelectedFont] = useState("Fira Code"); // Just the name
+    const [activeFont, setActiveFont] = useState({ name: null, base64: null }); // The full { name, base64 } object
     const [image, setImage] = useState({ url: null, width: 240, height: 135, x: 20, y: 30, radius: 10 });
     const [hint, setHint] = useState({ show: true, x: 20, y: 240, size: 8 });
     const [credit, setCredit] = useState({ show: true, x: 320, y: 240, size: 8 });
@@ -70,6 +75,38 @@ function App() {
             values: prev.values.filter(f => f.id !== id)
         }));
     };
+    useEffect(() => {
+        const loadAndInject = async () => {
+            //try {
+            // 1. Dynamic Import from the nano-font library
+            const formattedName = selectedFont.replace(/\s+/g, '_');
+            const fontModule = await import(`../node_modules/nano-font/fonts/${formattedName}`);
+            const fontData = fontModule.default;
+
+            // 2. Inject into HTML <head> so the UI updates
+            const id = `font-style-${formattedName}`;
+            if (!document.getElementById(id)) {
+                const style = document.createElement('style');
+                style.id = id;
+                style.innerHTML = `
+    				      @font-face {
+    				        font-family: "${fontData.name}";
+    				        src: url("${fontData.base64}") format("woff2");
+    				      }
+    				    `;
+                document.head.appendChild(style);
+            }
+
+            // 3. Update state so the SVG has the base64 for PNG export
+            setActiveFont(fontData);
+            //} catch (e) {
+            //console.error("Failed to load font:", selectedFont);
+            //}
+        };
+
+        loadAndInject();
+    }, [selectedFont]);
+
     return (
         <div className="flex bg-[#0f0f14] text-gray-200">
             <aside id="sidebar" className="p-10 space-y-4 w-100 h-screen sticky top-0 bg-[#16161e] border-r border-[#24283b] overflow-y-auto overflow-x-hidden">
@@ -95,6 +132,9 @@ function App() {
                             />
                         ))}
                     </div>
+                    <FontPicker element={selectedFont} setter={setSelectedFont} />
+                    <WidthHeight element={theme} setter={setTheme} />
+                    <BorderRadius element={theme} setter={setTheme} />
                 </section>
                 <Sep />
                 <div className="mb-6">
@@ -112,30 +152,7 @@ function App() {
                             {image.url ? "Change Image" : "Upload PNG/JPG"}
                         </p>
                     </div>
-                    <div className='flex flex-row text-center items-center mb-2'>
-                        <label className="text-xs font-bold text-gray-500 uppercase block">
-                            Width:
-                        </label>
-                        <input
-                            type="number"
-                            min="0"
-                            max="500"
-                            value={image.width}
-                            onChange={(e) => setImage({ ...image, width: parseInt(e.target.value) })}
-                            className="text-center ml-2 w-full h-8 bg-[#1a1b26] rounded-lg appearance-none cursor-text accent-blue-500"
-                        />
-                        <label className="ml-2 text-xs font-bold text-gray-500 uppercase block">
-                            Height:
-                        </label>
-                        <input
-                            type="number"
-                            min="0"
-                            max="250"
-                            value={image.height}
-                            onChange={(e) => setImage({ ...image, height: parseInt(e.target.value) })}
-                            className="text-center ml-2 w-full h-8 bg-[#1a1b26] rounded-lg appearance-none cursor-text accent-blue-500"
-                        />
-                    </div>
+                    <WidthHeight element={image} setter={setImage} max_height={theme.height} max_width={theme.width} />
                     <Pos element={image} setter={setImage} />
                     <BorderRadius element={image} setter={setImage} />
                 </div>
@@ -233,7 +250,7 @@ function App() {
                 <Pos element={credit} setter={setCredit} />
                 <Size element={credit} setter={setCredit} />
                 <Sep />
-                <div className="pt-6 mt-6">
+                <div className="pt-6">
                     <button
                         onClick={exportSVG}
                         className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2"
@@ -242,20 +259,20 @@ function App() {
                         Export SVG
                     </button>
                 </div>
-                <div className="pt-6 mt-6">
+                <div className="pt-6">
                     <button
-                        onClick={exportPNG}
+                        onClick={() => exportPNG(theme.width, theme.height)}
                         className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
-                        Export PNG (bit funky rn)
+                        Export PNG
                     </button>
                 </div>
             </aside>
 
             <main className="flex-1 p-8 h-screen flex items-center justify-center">
                 <div className="w-full h-full max-w-6xl flex items-center justify-center">
-                    <RiceCard hint={hint} dotfiles={dotfiles} fields={fields} theme={theme} image={image} credit={credit} />
+                    <RiceCard activeFont={activeFont} hint={hint} dotfiles={dotfiles} fields={fields} theme={theme} image={image} credit={credit} />
                 </div>
             </main>
         </div>

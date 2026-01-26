@@ -7,23 +7,27 @@ const RiceRow = ({ label, value, src, x, y, size, theme }) => (
     </a>
 );
 
-export default function RiceCard({ dotfiles, hint, fields, theme, image, credit }) {
-    const fontUrlName = theme.font.replace(/\s+/g, '+');
+export default function RiceCard({ activeFont, dotfiles, hint, fields, theme, image, credit }) {
     return (
         <svg
             id="rice-svg"
             width="100%"
             height="100%"
-            viewBox={`0 0 500 250`}
+            viewBox={`0 0 ${theme.width} ${theme.height}`}
             xmlns="http://www.w3.org/2000/svg"
-            fontFamily={theme.font}
+            fontFamily={activeFont?.name || "monospace"}
         >
             <defs>
-                <style type="text/css">
-                    {`@import url('https://fonts.googleapis.com/css2?family=${fontUrlName}&display=swap');`}
-                </style>
+                {activeFont && (
+                    <style>
+                        {`@font-face {
+        					  font-family: "${activeFont.name}";
+        					  src: url("${activeFont.base64}") format("woff2");
+        					}`}
+                    </style>
+                )}
             </defs>
-            <rect width="500" height="250" rx="15" fill={theme.bg} />
+            <rect width={theme.width} height={theme.height} rx={theme.radius} fill={theme.bg} />
 
             {image.url ? (
                 <image

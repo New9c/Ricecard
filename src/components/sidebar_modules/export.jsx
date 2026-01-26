@@ -22,15 +22,15 @@ export const exportSVG = () => {
     // Clean up the URL object
     URL.revokeObjectURL(url);
 };
-export const exportPNG = async () => {
+export const exportPNG = async (svg_width, svg_height) => {
     const svg = document.querySelector("#rice-svg");
     const svgData = new XMLSerializer().serializeToString(svg);
 
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
     const scale = 4;
-    canvas.width = 500 * scale;
-    canvas.height = 250 * scale;
+    canvas.width = svg_width * scale;
+    canvas.height = svg_height * scale;
     ctx.scale(scale, scale);
 
     const img = new Image();
@@ -38,18 +38,15 @@ export const exportPNG = async () => {
     const url = URL.createObjectURL(svgBlob);
 
     img.onload = () => {
-        // 1. Instead of drawing immediately, we wait 1 second
-        setTimeout(() => {
-            ctx.drawImage(img, 0, 0, 500, 250);
+        ctx.drawImage(img, 0, 0, svg_width, svg_height);
 
-            const pngUrl = canvas.toDataURL("image/png", 1.0);
-            const downloadLink = document.createElement("a");
-            downloadLink.href = pngUrl;
-            downloadLink.download = "my-rice.png";
-            downloadLink.click();
+        const pngUrl = canvas.toDataURL("image/png", 1.0);
+        const downloadLink = document.createElement("a");
+        downloadLink.href = pngUrl;
+        downloadLink.download = "my-rice.png";
+        downloadLink.click();
 
-            URL.revokeObjectURL(url);
-        }, 1000); // 1000ms = 1 second "Force Wait"
+        URL.revokeObjectURL(url);
     };
 
     img.src = url;
