@@ -75,10 +75,11 @@ function App() {
             values: prev.values.filter(f => f.id !== id)
         }));
     };
+    const fontModules = import.meta.glob('../assets/fonts/*.js');
     useEffect(() => {
         const loadAndInject = async () => {
             const formattedName = selectedFont.replace(/\s+/g, '_');
-            const fontModule = await import(`./assets/fonts/${formattedName}`);
+            const fontModule = await import(`./assets/fonts/${formattedName}.js`);
             const fontData = fontModule.default;
 
             const id = `font-style-${formattedName}`;
@@ -93,7 +94,6 @@ function App() {
     				    `;
                 document.head.appendChild(style);
             }
-
             setActiveFont(fontData);
         };
 
