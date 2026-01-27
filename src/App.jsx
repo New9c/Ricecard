@@ -78,7 +78,7 @@ function App() {
     useEffect(() => {
         const loadAndInject = async () => {
             const formattedName = selectedFont.replace(/\s+/g, '_');
-            const fontModule = await import(`../node_modules/nano-font/fonts/${formattedName}`);
+            const fontModule = await import(`./assets/fonts/${formattedName}`);
             const fontData = fontModule.default;
 
             const id = `font-style-${formattedName}`;

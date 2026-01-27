@@ -1,17 +1,11 @@
-const RiceRow = ({ label, value, src, x, y, size, theme }) => (
-    src != "" ?
-        <a href={src}>
-            <text x={x} y={y} fontSize={size} className={`${theme.haveAnimation && "intro-text"} transition-transform duration-300 hover:-translate-y-1 animate-fade-in`}>
-                <tspan fill={theme.accent} fontWeight="bold">{label} </tspan>
-                <tspan fill={theme.text}>{value}</tspan>
-            </text>
-        </a> :
-        <text x={x} y={y} fontSize={size} className={`${theme.haveAnimation && "intro-text"} transition-transform duration-300 animate-fade-in`}>
-            <tspan fill={theme.accent} fontWeight="bold">{label} </tspan>
-            <tspan fill={theme.text}>{value}</tspan>
-        </text>
+import Image from './ricecard_modules/Image'
+import Dotfiles from './ricecard_modules/Dotfiles'
+import Credit from './ricecard_modules/Credit'
+import Hint from './ricecard_modules/Hint'
+import Fields from './ricecard_modules/Fields'
 
-);
+import Blur from './ricecard_modules/Blur'
+import SvgStyles from './ricecard_modules/SvgStyles'
 
 export default function RiceCard({ activeFont, dotfiles, hint, fields, theme, image, credit }) {
     return (
@@ -24,99 +18,17 @@ export default function RiceCard({ activeFont, dotfiles, hint, fields, theme, im
             fontFamily={activeFont?.name || "monospace"}
         >
             <defs>
-                <filter id="blur" x="-20%" y="-20%" width="140%" height="140%">
-                    <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="blur" />
-                    <feOffset in="blur" dx="0" dy="0" result="offsetBlur" />
-                    <feFlood floodColor={theme.accent} result="glowColor" />
-                    <feComposite in="glowColor" in2="offsetBlur" operator="in" result="glow" />
-                    <feMerge>
-                        <feMergeNode in="glow" />
-                        <feMergeNode in="SourceGraphic" />
-                    </feMerge>
-                </filter>
-                <style>
-                    {`
-						.exporting .intro-text {
-						  animation: none !important;
-						  opacity: 1 !important;
-						  transform: translateY(0px) !important;
-						}
-						.intro-text {
-						  /* 1. Set the initial state so it doesn't "flash" */
-						  opacity: 0;
-						  transform: translateY(10px);
-						  transform-box: fill-box;
-						
-						  /* 2. Run the animation */
-						  /* 'forwards' ensures it stays at the 100% state (visible) */
-						  animation: text-intro 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-						}
-						
-						@keyframes text-intro {
-						  to { 
-						    opacity: 1; 
-						    transform: translateY(0px); 
-						  }
-						}
-    				`}
-                </style>
-                {activeFont && (
-                    <style>
-                        {`@font-face {
-        					  font-family: "${activeFont.name}";
-        					  src: url("${activeFont.base64}") format("woff2");
-        					}`}
-                    </style>
-                )}
+                <Blur theme={theme} />
+                <SvgStyles activeFont={activeFont} />
             </defs>
             <rect width={theme.width} height={theme.height} rx={theme.radius} fill={theme.bg} filter={theme.haveBacklight ? "url(#blur)" : undefined} />
 
-            {image.url ? (
-                <image
-                    href={image.url}
-                    x={image.x}
-                    y={image.y}
-                    width={image.width}
-                    height={image.height}
-                    preserveAspectRatio="xMidYMid slice"
-                    clipPath={`inset(0% round ${image.radius}px)`} // Optional: rounds the corners of the image
-                />
-            ) : (
-                <rect x={image.x} y={image.y} width={image.width} height={image.height}
-                    fill={theme.accent} rx={image.radius} />
-            )}
+            <Image image={image} theme={theme} />
+            <Dotfiles dotfiles={dotfiles} theme={theme} />
+            <Hint hint={hint} theme={theme} />
+            <Credit credit={credit} theme={theme} />
+            <Fields fields={fields} theme={theme} />
 
-            <a href={dotfiles.src}>
-                <text x={dotfiles.x} y={dotfiles.y} fontSize={dotfiles.size} className={`${theme.haveAnimation && "intro-text"} transition-transform duration-300 hover:-translate-y-1 animate-fade-in cursor-pointer`} style={{ animationDelay: '0.4s' }}>
-                    <tspan fill={theme.text}>{dotfiles.title}</tspan>
-                </text>
-            </a>
-            {hint.show &&
-                <text x={hint.x} y={hint.y} fontSize={hint.size} className={`${theme.haveAnimation && "intro-text"} animate-fade-in`} style={{ animationDelay: '0.8s' }}>
-                    <tspan fill={theme.text}>Things that hover are all links!</tspan>
-                </text>
-            }
-            {credit.show &&
-                <a href="https://danew9c.com/ricecard">
-                    <text x={credit.x} y={credit.y} fontSize={credit.size} className={`${theme.haveAnimation && "intro-text"} transition-transform duration-300 hover:-translate-y-1 animate-fade-in cursor-pointer`} style={{ animationDelay: '0.8s' }}>
-                        <tspan fill={theme.text}>Made with danew9c.com/ricecard :)</tspan>
-                    </text>
-                </a>
-            }
-
-            {/* The fields.values (Shifted to the right to make room for the image) */}
-            {fields.values.map((field, index) => (
-                <RiceRow
-                    key={field.id}
-                    label={field.label}
-                    value={field.value}
-                    src={field.src}
-                    x={fields.x}
-                    y={fields.y + (index * fields.gap)}
-                    size={fields.size}
-                    theme={theme}
-                />
-            ))}
         </svg>
     );
 }
