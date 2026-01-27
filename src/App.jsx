@@ -11,6 +11,7 @@ import ThemeButton from './components/sidebar_modules/ThemeButton';
 import { exportSVG, exportPNG } from './components/sidebar_modules/export';
 
 import themes from './data/themes';
+import { base64 } from 'nano-font/fonts/MedievalSharp';
 
 function App() {
     const [fields, setFields] = useState({
@@ -75,12 +76,11 @@ function App() {
             values: prev.values.filter(f => f.id !== id)
         }));
     };
-    const fontModules = import.meta.glob('../assets/fonts/*.js');
     useEffect(() => {
         const loadAndInject = async () => {
             const formattedName = selectedFont.replace(/\s+/g, '_');
-            const fontModule = await import(`./assets/fonts/${formattedName}.js`);
-            const fontData = fontModule.default;
+            const response = await fetch(`${import.meta.env.BASE_URL}fonts/${formattedName}.txt`);
+            const fontBase64 = await response.text();
 
             const id = `font-style-${formattedName}`;
             if (!document.getElementById(id)) {
@@ -88,13 +88,13 @@ function App() {
                 style.id = id;
                 style.innerHTML = `
     				      @font-face {
-    				        font-family: "${fontData.name}";
-    				        src: url("${fontData.base64}") format("woff2");
+    				        font-family: "${selectedFont}";
+    				        src: url("${fontBase64}") format("woff2");
     				      }
     				    `;
                 document.head.appendChild(style);
             }
-            setActiveFont(fontData);
+            setActiveFont({ name: selectedFont, base64: fontBase64 });
         };
 
         loadAndInject();
