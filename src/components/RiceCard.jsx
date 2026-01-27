@@ -1,7 +1,7 @@
 const RiceRow = ({ label, value, src, x, y, size, theme }) => (
     <a href={src}>
         <text x={x} y={y} fontSize={size} className="transition-transform duration-300 hover:-translate-y-1 animate-fade-in">
-            <tspan fill={theme.accent} fontWeight="bold">{label}: </tspan>
+            <tspan fill={theme.accent} fontWeight="bold">{label} </tspan>
             <tspan fill={theme.text}>{value}</tspan>
         </text>
     </a>
@@ -13,11 +13,21 @@ export default function RiceCard({ activeFont, dotfiles, hint, fields, theme, im
             id="rice-svg"
             width="100%"
             height="100%"
-            viewBox={`0 0 ${theme.width} ${theme.height}`}
+            viewBox={`-15 -15 ${theme.width + 30} ${theme.height + 30}`}
             xmlns="http://www.w3.org/2000/svg"
             fontFamily={activeFont?.name || "monospace"}
         >
             <defs>
+                <filter id="blur" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="blur" />
+                    <feOffset in="blur" dx="0" dy="0" result="offsetBlur" />
+                    <feFlood floodColor={theme.accent} result="glowColor" />
+                    <feComposite in="glowColor" in2="offsetBlur" operator="in" result="glow" />
+                    <feMerge>
+                        <feMergeNode in="glow" />
+                        <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                </filter>
                 {activeFont && (
                     <style>
                         {`@font-face {
@@ -27,7 +37,7 @@ export default function RiceCard({ activeFont, dotfiles, hint, fields, theme, im
                     </style>
                 )}
             </defs>
-            <rect width={theme.width} height={theme.height} rx={theme.radius} fill={theme.bg} />
+            <rect width={theme.width} height={theme.height} rx={theme.radius} fill={theme.bg} filter={theme.haveBacklight ? "url(#blur)" : undefined} />
 
             {image.url ? (
                 <image

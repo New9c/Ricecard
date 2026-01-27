@@ -1,4 +1,3 @@
-import Baloo_2 from "nano-font/fonts/Baloo_2";
 import React, { useState, useEffect } from 'react';
 import RiceCard from './components/RiceCard';
 import FontPicker from './components/sidebar_modules/FontPicker'
@@ -16,10 +15,10 @@ import themes from './data/themes';
 function App() {
     const [fields, setFields] = useState({
         values: [
-            { id: 1, label: 'OS', value: 'Arch Linux', src: 'https://archlinux.org' },
-            { id: 2, label: 'WM', value: 'Niri', src: 'https://github.com/YaLTeR/niri' },
-            { id: 3, label: 'Shell', value: 'fish', src: 'https://fishshell.com' },
-            { id: 4, label: 'App Launcher', value: 'Vicinae', src: 'https://www.vicinae.com' },
+            { id: 1, label: 'OS:', value: 'Arch Linux', src: 'https://archlinux.org' },
+            { id: 2, label: 'WM:', value: 'Niri', src: 'https://github.com/YaLTeR/niri' },
+            { id: 3, label: 'Shell:', value: 'fish', src: 'https://fishshell.com' },
+            { id: 4, label: 'App Launcher:', value: 'Vicinae', src: 'https://www.vicinae.com' },
         ],
         x: 280, y: 70, size: 14, gap: 35
     });
@@ -30,7 +29,7 @@ function App() {
     const [theme, setTheme] = useState({
         name: "Tokyo Night", bg: "#1a1b26",
         accent: "#7aa2f7", text: "#a9b1d6",
-        radius: 15, width: 500, height: 250
+        radius: 15, width: 500, height: 250, haveBacklight: true
     });
     const [selectedFont, setSelectedFont] = useState("Fira Code"); // Just the name
     const [activeFont, setActiveFont] = useState({ name: null, base64: null }); // The full { name, base64 } object
@@ -133,6 +132,19 @@ function App() {
                         ))}
                     </div>
                     <FontPicker element={selectedFont} setter={setSelectedFont} />
+                    <div className="flex items-center gap-3 mb-6">
+                        <input
+                            id="backlight"
+                            type="checkbox"
+                            checked={theme.haveBacklight}
+                            onChange={(e) => setTheme({ ...theme, haveBacklight: e.target.checked })}
+                            // "accent-blue-500" styles the checkbox color easily
+                            className="w-4 h-4 rounded bg-[#1a1b26] border-[#414868] accent-blue-500 cursor-pointer"
+                        />
+                        <label htmlFor="backlight" className="text-xs font-bold text-gray-500 uppercase cursor-pointer select-none ">
+                            Have Backlight / Blur
+                        </label>
+                    </div>
                     <WidthHeight element={theme} setter={setTheme} />
                     <BorderRadius element={theme} setter={setTheme} />
                 </section>
@@ -153,7 +165,7 @@ function App() {
                         </p>
                     </div>
                     <WidthHeight element={image} setter={setImage} max_height={theme.height} max_width={theme.width} />
-                    <Pos element={image} setter={setImage} />
+                    <Pos max_width={theme.width} max_height={theme.height} element={image} setter={setImage} />
                     <BorderRadius element={image} setter={setImage} />
                 </div>
                 <Sep />
@@ -193,7 +205,7 @@ function App() {
                         + Add Row
                     </button>
                 </div>
-                <Pos element={fields} setter={setFields} />
+                <Pos max_width={theme.width} max_height={theme.height} element={fields} setter={setFields} />
                 <Size element={fields} setter={setFields} />
                 <Gap element={fields} setter={setFields} />
                 <Sep />
@@ -216,7 +228,7 @@ function App() {
                         className="w-full bg-[#1a1b26] border border-[#414868] rounded p-1 text-xs text-gray-400"
                     />
                 </div>
-                <Pos element={dotfiles} setter={setDotfiles} />
+                <Pos max_width={theme.width} max_height={theme.height} element={dotfiles} setter={setDotfiles} />
                 <Size element={dotfiles} setter={setDotfiles} />
                 <Sep />
                 <div className="flex items-center gap-3 mb-6">
@@ -231,7 +243,7 @@ function App() {
                         Hint that hovers are links
                     </label>
                 </div>
-                <Pos element={hint} setter={setHint} />
+                <Pos max_width={theme.width} max_height={theme.height} element={hint} setter={setHint} />
                 <Size element={hint} setter={setHint} />
                 <Sep />
                 <div className="flex items-center gap-3 mb-6">
@@ -247,7 +259,7 @@ function App() {
                         pls don't uncheck me :c (MENTION RICECARD)
                     </label>
                 </div>
-                <Pos element={credit} setter={setCredit} />
+                <Pos max_width={theme.width} max_height={theme.height} element={credit} setter={setCredit} />
                 <Size element={credit} setter={setCredit} />
                 <Sep />
                 <div className="pt-6">

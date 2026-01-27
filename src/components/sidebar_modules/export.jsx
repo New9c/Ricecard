@@ -23,6 +23,8 @@ export const exportSVG = () => {
     URL.revokeObjectURL(url);
 };
 export const exportPNG = async (svg_width, svg_height) => {
+    svg_width += 30
+    svg_height += 30
     const svg = document.querySelector("#rice-svg");
     const svgData = new XMLSerializer().serializeToString(svg);
 
