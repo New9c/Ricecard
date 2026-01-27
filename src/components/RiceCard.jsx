@@ -1,10 +1,16 @@
 const RiceRow = ({ label, value, src, x, y, size, theme }) => (
-    <a href={src}>
-        <text x={x} y={y} fontSize={size} className="transition-transform duration-300 hover:-translate-y-1 animate-fade-in">
+    src != "" ?
+        <a href={src}>
+            <text x={x} y={y} fontSize={size} className={`${theme.haveAnimation && "intro-text"} transition-transform duration-300 hover:-translate-y-1 animate-fade-in`}>
+                <tspan fill={theme.accent} fontWeight="bold">{label} </tspan>
+                <tspan fill={theme.text}>{value}</tspan>
+            </text>
+        </a> :
+        <text x={x} y={y} fontSize={size} className={`${theme.haveAnimation && "intro-text"} transition-transform duration-300 animate-fade-in`}>
             <tspan fill={theme.accent} fontWeight="bold">{label} </tspan>
             <tspan fill={theme.text}>{value}</tspan>
         </text>
-    </a>
+
 );
 
 export default function RiceCard({ activeFont, dotfiles, hint, fields, theme, image, credit }) {
@@ -28,6 +34,32 @@ export default function RiceCard({ activeFont, dotfiles, hint, fields, theme, im
                         <feMergeNode in="SourceGraphic" />
                     </feMerge>
                 </filter>
+                <style>
+                    {`
+						.exporting .intro-text {
+						  animation: none !important;
+						  opacity: 1 !important;
+						  transform: translateY(0px) !important;
+						}
+						.intro-text {
+						  /* 1. Set the initial state so it doesn't "flash" */
+						  opacity: 0;
+						  transform: translateY(10px);
+						  transform-box: fill-box;
+						
+						  /* 2. Run the animation */
+						  /* 'forwards' ensures it stays at the 100% state (visible) */
+						  animation: text-intro 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+						}
+						
+						@keyframes text-intro {
+						  to { 
+						    opacity: 1; 
+						    transform: translateY(0px); 
+						  }
+						}
+    				`}
+                </style>
                 {activeFont && (
                     <style>
                         {`@font-face {
@@ -55,19 +87,21 @@ export default function RiceCard({ activeFont, dotfiles, hint, fields, theme, im
             )}
 
             <a href={dotfiles.src}>
-                <text x={dotfiles.x} y={dotfiles.y} fontSize={dotfiles.size} className="transition-transform duration-300 hover:-translate-y-1 animate-fade-in cursor-pointer">
+                <text x={dotfiles.x} y={dotfiles.y} fontSize={dotfiles.size} className={`${theme.haveAnimation && "intro-text"} transition-transform duration-300 hover:-translate-y-1 animate-fade-in cursor-pointer`} style={{ animationDelay: '0.4s' }}>
                     <tspan fill={theme.text}>{dotfiles.title}</tspan>
                 </text>
             </a>
             {hint.show &&
-                <text x={hint.x} y={hint.y} fontSize={hint.size} className="animate-fade-in">
+                <text x={hint.x} y={hint.y} fontSize={hint.size} className={`${theme.haveAnimation && "intro-text"} animate-fade-in`} style={{ animationDelay: '0.8s' }}>
                     <tspan fill={theme.text}>Things that hover are all links!</tspan>
                 </text>
             }
             {credit.show &&
-                <text x={credit.x} y={credit.y} fontSize={credit.size} className="transition-transform duration-300 hover:-translate-y-1 animate-fade-in cursor-pointer">
-                    <tspan fill={theme.text}>Made with danew9c.com/ricecard :)</tspan>
-                </text>
+                <a href="https://danew9c.com/ricecard">
+                    <text x={credit.x} y={credit.y} fontSize={credit.size} className={`${theme.haveAnimation && "intro-text"} transition-transform duration-300 hover:-translate-y-1 animate-fade-in cursor-pointer`} style={{ animationDelay: '0.8s' }}>
+                        <tspan fill={theme.text}>Made with danew9c.com/ricecard :)</tspan>
+                    </text>
+                </a>
             }
 
             {/* The fields.values (Shifted to the right to make room for the image) */}

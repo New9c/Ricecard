@@ -23,6 +23,8 @@ export const exportSVG = () => {
     URL.revokeObjectURL(url);
 };
 export const exportPNG = async (svg_width, svg_height) => {
+    const svgElement = document.getElementById('rice-svg');
+    svgElement.classList.add('exporting');
     svg_width += 30
     svg_height += 30
     const svg = document.querySelector("#rice-svg");
@@ -52,4 +54,5 @@ export const exportPNG = async (svg_width, svg_height) => {
     };
 
     img.src = url;
+    svgElement.classList.remove('exporting');
 };

@@ -29,10 +29,11 @@ function App() {
     const [theme, setTheme] = useState({
         name: "Tokyo Night", bg: "#1a1b26",
         accent: "#7aa2f7", text: "#a9b1d6",
-        radius: 15, width: 500, height: 250, haveBacklight: true
+        radius: 15, width: 500, height: 250,
+        haveAnimation: true, haveBacklight: true
     });
-    const [selectedFont, setSelectedFont] = useState("Fira Code"); // Just the name
-    const [activeFont, setActiveFont] = useState({ name: null, base64: null }); // The full { name, base64 } object
+    const [selectedFont, setSelectedFont] = useState("Fira Code");
+    const [activeFont, setActiveFont] = useState({ name: null, base64: null });
     const [image, setImage] = useState({ url: null, width: 240, height: 135, x: 20, y: 30, radius: 10 });
     const [hint, setHint] = useState({ show: true, x: 20, y: 240, size: 8 });
     const [credit, setCredit] = useState({ show: true, x: 320, y: 240, size: 8 });
@@ -42,7 +43,7 @@ function App() {
         if (file) {
             const reader = new FileReader();
             reader.onloadend = () => {
-                setImage({ ...image, url: reader.result }); // This is the Base64 string
+                setImage({ ...image, url: reader.result });
             };
             reader.readAsDataURL(file);
         }
@@ -51,7 +52,7 @@ function App() {
 
     const updateField = (id, key, newValue) => {
         setFields(prev => ({
-            ...prev, // Keep x, y, size, gap
+            ...prev,
             values: prev.values.map(f =>
                 f.id === id ? { ...f, [key]: newValue } : f
             )
@@ -60,29 +61,26 @@ function App() {
 
     const addField = () => {
         setFields(prev => ({
-            ...prev, // Keep x, y, size, gap
+            ...prev,
             values: [
                 ...prev.values,
-                { id: Date.now(), label: 'Rice', value: 'Card' }
+                { id: Date.now() }
             ]
         }));
     };
 
     const removeField = (id) => {
         setFields(prev => ({
-            ...prev, // Keep x, y, size, gap
+            ...prev,
             values: prev.values.filter(f => f.id !== id)
         }));
     };
     useEffect(() => {
         const loadAndInject = async () => {
-            //try {
-            // 1. Dynamic Import from the nano-font library
             const formattedName = selectedFont.replace(/\s+/g, '_');
             const fontModule = await import(`../node_modules/nano-font/fonts/${formattedName}`);
             const fontData = fontModule.default;
 
-            // 2. Inject into HTML <head> so the UI updates
             const id = `font-style-${formattedName}`;
             if (!document.getElementById(id)) {
                 const style = document.createElement('style');
@@ -96,11 +94,7 @@ function App() {
                 document.head.appendChild(style);
             }
 
-            // 3. Update state so the SVG has the base64 for PNG export
             setActiveFont(fontData);
-            //} catch (e) {
-            //console.error("Failed to load font:", selectedFont);
-            //}
         };
 
         loadAndInject();
@@ -108,8 +102,10 @@ function App() {
 
     return (
         <div className="flex bg-[#0f0f14] text-gray-200">
-            <aside id="sidebar" className="p-10 space-y-4 w-100 h-screen sticky top-0 bg-[#16161e] border-r border-[#24283b] overflow-y-auto overflow-x-hidden">
-                <h2 id="ricecard-title" className="text-xl font-bold mb-6 text-white">Ricecard</h2>
+            <aside id="sidebar" className="p-10 space-y-4 w-100 h-screen sticky top-0 bg-[#1e1e2e] border-r border-[#24283b] overflow-y-auto overflow-x-hidden">
+                <a href="https://github.com/new9c/ricecard">
+                    <h2 id="ricecard-title" className="text-xl font-bold mb-6 text-white">Ricecard</h2>
+                </a>
                 <section className="space-y-4">
                     <label className="block text-xs font-bold text-gray-500 uppercase mb-2">
                         Themes
@@ -124,7 +120,7 @@ function App() {
                                 onClick={() => setTheme({
                                     ...theme,
                                     name: t.name,
-                                    accent: t.accent, // Automatically updates the SVG color
+                                    accent: t.accent,
                                     bg: t.bg,
                                     text: t.text
                                 })}
@@ -134,11 +130,22 @@ function App() {
                     <FontPicker element={selectedFont} setter={setSelectedFont} />
                     <div className="flex items-center gap-3 mb-6">
                         <input
+                            id="animation"
+                            type="checkbox"
+                            checked={theme.haveAnimation}
+                            onChange={(e) => setTheme({ ...theme, haveAnimation: e.target.checked })}
+                            className="w-4 h-4 rounded bg-[#1a1b26] border-[#414868] accent-blue-500 cursor-pointer"
+                        />
+                        <label htmlFor="animation" className="text-xs font-bold text-gray-500 uppercase cursor-pointer select-none ">
+                            Have Start Animation
+                        </label>
+                    </div>
+                    <div className="flex items-center gap-3 mb-6">
+                        <input
                             id="backlight"
                             type="checkbox"
                             checked={theme.haveBacklight}
                             onChange={(e) => setTheme({ ...theme, haveBacklight: e.target.checked })}
-                            // "accent-blue-500" styles the checkbox color easily
                             className="w-4 h-4 rounded bg-[#1a1b26] border-[#414868] accent-blue-500 cursor-pointer"
                         />
                         <label htmlFor="backlight" className="text-xs font-bold text-gray-500 uppercase cursor-pointer select-none ">
@@ -174,16 +181,19 @@ function App() {
                         <div key={field.id} className="flex gap-2 items-end">
                             <div className="flex-1">
                                 <input
+                                    placeholder="Category"
                                     value={field.label}
                                     onChange={(e) => updateField(field.id, 'label', e.target.value)}
                                     className="w-full bg-[#1a1b26] border border-[#414868] rounded p-1 text-xs text-gray-400"
                                 />
                                 <input
+                                    placeholder="Name"
                                     value={field.value}
                                     onChange={(e) => updateField(field.id, 'value', e.target.value)}
                                     className="w-full bg-[#1a1b26] border border-[#414868] rounded p-2 mt-1 text-white"
                                 />
                                 <input
+                                    placeholder="Link (Optional)"
                                     value={field.src}
                                     onChange={(e) => updateField(field.id, 'src', e.target.value)}
                                     className="w-full bg-[#1a1b26] border border-[#414868] rounded p-2 mt-1 text-white"
@@ -218,14 +228,14 @@ function App() {
                         value={dotfiles.title}
                         onChange={(e) => setDotfiles({ ...dotfiles, title: e.target.value })}
                         placeholder="Title (Optional)"
-                        className="w-full bg-[#1a1b26] border border-[#414868] rounded p-1 text-xs text-gray-400"
+                        className="w-full bg-[#1a1b26] border border-[#414868] rounded p-2 mt-1 text-white"
                     />
                     <input
                         name="src"
                         value={dotfiles.src}
                         onChange={(e) => setDotfiles({ ...dotfiles, src: e.target.value })}
                         placeholder="URL (Optional)"
-                        className="w-full bg-[#1a1b26] border border-[#414868] rounded p-1 text-xs text-gray-400"
+                        className="w-full bg-[#1a1b26] border border-[#414868] rounded p-2 mt-1 text-white"
                     />
                 </div>
                 <Pos max_width={theme.width} max_height={theme.height} element={dotfiles} setter={setDotfiles} />
@@ -262,7 +272,7 @@ function App() {
                 <Pos max_width={theme.width} max_height={theme.height} element={credit} setter={setCredit} />
                 <Size element={credit} setter={setCredit} />
                 <Sep />
-                <div className="pt-6">
+                <div className="pt-2">
                     <button
                         onClick={exportSVG}
                         className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2"
@@ -271,7 +281,7 @@ function App() {
                         Export SVG
                     </button>
                 </div>
-                <div className="pt-6">
+                <div className="pt-2">
                     <button
                         onClick={() => exportPNG(theme.width, theme.height)}
                         className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2"
