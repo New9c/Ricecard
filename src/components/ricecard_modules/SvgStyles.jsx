@@ -1,7 +1,8 @@
 export default function SvgStyles({ activeFont }) {
     return (
-        <style>
-            {`
+        <>
+            <style>
+                {`
 				.hover-text {
         		  transform-box: fill-box;
         		  transform-origin: center;
@@ -31,14 +32,15 @@ export default function SvgStyles({ activeFont }) {
 				  }
 				}
     		`}
+            </style>
             {activeFont && (
                 <style>
                     {`@font-face {
-        					  font-family: "${activeFont.name}";
-        					  src: url("${activeFont.base64}") format("woff2");
-        					}`}
+                          font-family: "${activeFont.name}";
+                          src: url("${activeFont.base64}") format("woff2");
+                        }`}
                 </style>
             )}
-        </style>
+        </>
     )
 }
