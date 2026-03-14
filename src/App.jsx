@@ -88,13 +88,13 @@ function App() {
                 style.id = id;
                 style.innerHTML = `
     				      @font-face {
-    				        font-family: "${selectedFont}";
+    				        font-family: "${formattedName}";
     				        src: url("${fontBase64}") format("woff2");
     				      }
     				    `;
                 document.head.appendChild(style);
             }
-            setActiveFont({ name: selectedFont, base64: fontBase64 });
+            setActiveFont({ name: formattedName, base64: fontBase64 });
         };
 
         loadAndInject();
